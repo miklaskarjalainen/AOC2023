@@ -1,4 +1,3 @@
-
 class EngineSchematic:
     schematic: str = ""
     width: int = -1
@@ -23,7 +22,7 @@ class EngineSchematic:
 
     def get_chr(self, x: int, y: int):
         _idx = y * self.width + x
-        return self.schematic[_idx]
+        return (self.schematic[_idx], _idx)
 
     def get_neighbours(self, x: int, y: int):
         _idx = y * self.width + x
@@ -54,18 +53,21 @@ class EngineSchematic:
 
         return _neighbours
 
-    def get_numbers(self) -> [(int, int)]:
+    def get_numbers(self) -> [(int, [int])]:
         _nums = []
         _cur_num = -1
+
         _idx = 0
-        _is_neg = False
+        _idxs = []
 
         for ch in self.schematic:
             # disables screenwrapping from end of a line
             if _idx % self.width == 0:
                 if _cur_num != -1:
-                    _nums.append((_cur_num, _idx-1))
+                    _nums.append((_cur_num, _idxs))
+                    _idxs = []
                     _cur_num = -1
+
                 
             if ch.isdigit():
                 if _cur_num != -1:
@@ -73,41 +75,41 @@ class EngineSchematic:
                     _cur_num += int(ch)
                 else:
                     _cur_num = int(ch)
+                _idxs.append(_idx)
             else:
                 if _cur_num != -1:
-                    _nums.append((_cur_num, _idx-1))
+                    _nums.append((_cur_num, _idxs))
+                    _idxs = []
                     _cur_num = -1
             
             _idx += 1
     
         return _nums
 
-
-def countDigit(n) -> int: 
-    count = 0
-    n = abs(n)
-    while n != 0: 
-        n //= 10
-        count += 1
-    return count
-
 schematic = EngineSchematic.init_from_file("./input.txt")
 nums = schematic.get_numbers()
 
-result = 0
-for (num, idx) in nums:
-    _count = countDigit(num)
+stars = {} # <idx>: <nums>
+for (num, idxs) in nums:
+    print("", num, idxs)
     _found = False
-    for offset in range(0,_count):
+    for idx in idxs:
         if _found:
             break
-        
-        _new_idx = idx - offset
-
-        _neighbours = schematic.get_neighbours_idx(_new_idx)
-        for n in _neighbours:
-            if (not n.isdigit()) and n != ".":
+        for (n, n_idx) in schematic.get_neighbours_idx(idx):
+            if n == "*":
+                if n_idx in stars:
+                    stars[n_idx].append(num)
+                else:
+                    stars[n_idx] = [num]
                 _found = True
-                result += num
+                break
+
+
+result = 0
+for k in stars.keys():
+    nums = stars[k]
+    if len(nums) == 2:
+        result += nums[0] * nums[1]
 
 print(str.format("Result: {}", result))
