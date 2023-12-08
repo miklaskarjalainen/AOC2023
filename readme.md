@@ -5,5 +5,8 @@ For each day a different programming langugage will be used and those which i kn
 
 1. [C++](./day-01/)
 1. [Rust](./day-02/)
+1. [Python](./day-03/)
+1. [Rust](./day-04/)
+
 
 
