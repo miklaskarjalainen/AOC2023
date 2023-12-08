@@ -5,7 +5,7 @@ author        = "Giffi"
 description   = "A new awesome nimble package"
 license       = "Proprietary"
 srcDir        = "src"
-bin           = @["part1"]
+bin           = @["part1", "part2"]
 
 
 # Dependencies
