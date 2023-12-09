@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
-using IntegerMap = System.Collections.Generic.Dictionary<ulong,ulong>;
+using IntegerMap = System.Collections.Generic.Dictionary<(ulong, ulong),ulong>;
 
 public class Mapper {
     private List<IntegerMap> m_Maps = new();
@@ -42,11 +42,7 @@ public class Mapper {
                 .ConvertAll<ulong>(num => ulong.Parse(num));
             
             // create maps
-            //! line like "1760603826 3853766926 127009556" crates stupidly huge maps and consumes way too much ram
-            ulong range_length = nums[2];
-            for (ulong i = 0; i < range_length; i++) {
-                m_Maps.Last().Add(nums[1] + i, nums[0] + i);
-            }
+            m_Maps.Last().Add((nums[1], nums[2]), nums[0]);
 
             nums.ForEach(n => Console.Write($"{n} "));
             Console.Write('\n');
@@ -59,11 +55,20 @@ public class Mapper {
         
         foreach (ulong seed in m_Seeds) {
             ulong currentMap = seed;
+            
+            Console.Write($"seed {seed} -> ");
             foreach(IntegerMap map in m_Maps) {
-                if (map.ContainsKey(currentMap)) {
-                    currentMap = map[currentMap];
+                foreach ((ulong start, ulong range) in map.Keys) {
+                    if (currentMap >= start && currentMap < (start + range)) {
+                        ulong difference = currentMap - start;
+                        ulong dest = map[(start, range)];
+                        currentMap = dest + difference;
+                        break;
+                    }
                 }
+                Console.Write($"{currentMap} -> ");
             }
+            Console.Write('\n');
             mapped.Add(currentMap);
         }
 
